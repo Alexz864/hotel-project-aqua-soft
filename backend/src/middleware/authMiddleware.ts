@@ -26,7 +26,8 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
         //add deocded user info to request object
         req.user = {
             id: decoded.id,
-            email: decoded.email
+            email: decoded.email,
+            role: decoded.role
         };
         
         next();
@@ -58,36 +59,4 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 export const generateToken = (payload: UserPayload): string => {
     const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
     return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
-};
-
-//simple auth route for testing
-export const loginForTesting = (req: Request, res: Response): void => {
-    //this is a simple mock login for testing purposes
-    //in a real login system we would validate credentials against a database
-    const { email, password } = req.body;
-    
-    if (!email || !password) {
-        res.status(400).json({ 
-            error: 'Email and password are required' 
-        });
-        return;
-    }
-    
-    //mock user validation
-    if (email === 'test@example.com' && password === 'password123') {
-        const token = generateToken({ 
-            id: '1', 
-            email: email 
-        });
-        
-        res.json({ 
-            message: 'Login successful',
-            token: token,
-            user: { id: '1', email: email }
-        });
-    } else {
-        res.status(401).json({ 
-            error: 'Invalid credentials' 
-        });
-    }
 };

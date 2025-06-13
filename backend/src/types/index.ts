@@ -55,6 +55,7 @@ export interface ReviewAttributes {
 export interface UserPayload {
     id: string;
     email: string;
+    role?: string;
 }
 
 export interface JWTPayload extends UserPayload {

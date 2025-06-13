@@ -6,12 +6,9 @@ import {
     updateHotel, 
     deleteHotel
 } from '../controllers/hotelController';
-import { authenticateToken, loginForTesting } from '../middleware/authMiddleware';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = Router();
-
-//auth route for testing
-router.post('/auth/login', loginForTesting);
 
 //protected routes
 router.post('/hotels', authenticateToken, createHotel);

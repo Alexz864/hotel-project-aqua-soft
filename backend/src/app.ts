@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import hotelRoutes from './routes/hotelRoutes';
+import authRoutes from './routes/authRoutes';
 
 //load environment variables
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(express.json());
 
 //routes
 app.use('/api', hotelRoutes);
+app.use('/api/auth', authRoutes);
 
 //health check route
 app.get('/health', (req: Request, res: Response) => {
@@ -37,7 +39,6 @@ app.use('*', (req: Request, res: Response) => {
                 'GET /api/hotels/:name - Get hotel by name'
             ],
             protected: [
-                'POST /api/auth/login - Login for testing',
                 'POST /api/hotels - Create new hotel (requires auth)',
                 'PUT /api/hotels/:id - Update hotel (requires auth)',
                 'DELETE /api/hotels/:id - Delete hotel (requires auth)'

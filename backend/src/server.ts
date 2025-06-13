@@ -1,5 +1,6 @@
 import app from "./app";
 import db from "./models";
+import { seedRolesAndPermissions } from "./scripts/seed-auth";
 
 const PORT = process.env.PORT || 3000;
 
@@ -13,6 +14,10 @@ const startServer = async () => {
         //sync database
         await db.sequelize.sync({ alter: true });
         console.log('Database synchronized.');
+
+        //seed roles and permissions if they don't exist
+        console.log("Checking/seeding roles and permissions...");
+        await seedRolesAndPermissions();
 
         //start server
         app.listen(PORT, () => {
