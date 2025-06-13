@@ -94,3 +94,25 @@ declare global {
         }
     }
 }
+
+export interface RoleAttributes {
+    RoleID: number;
+    RoleName: string;
+}
+
+export interface UserAttributes {
+    UserID: number;
+    Username: string;
+    Password: string;
+    Email: string;
+    RoleID: number;
+}
+
+export interface UserCreationAttributes extends Omit<UserAttributes, 'UserID'> {};
+
+export interface PermissionAttributes {
+    PermissionID: number;
+    RoleID: number;
+    Resource: string;
+    Action: string;
+}
