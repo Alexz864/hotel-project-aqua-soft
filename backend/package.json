@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "import-csv": "ts-node src/scripts/import-hotels.ts",
-    "scrape-reviews": "ts-node src/scripts/import-reviews.ts"
+    "scrape-reviews": "ts-node src/scripts/import-reviews.ts",
+    "create-admin": "ts-node src/scripts/create-first-admin.ts"
   },
   "keywords": [],
   "author": "",
