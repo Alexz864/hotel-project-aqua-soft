@@ -34,7 +34,7 @@ export const createFirstAdmin = async (): Promise<void> => {
         //create default admin user
         const adminData: UserCreationAttributes = {
             Username: 'admin',
-            Password: 'admin123', // Change this!
+            Password: 'admin123',
             Email: 'admin@hotel.com',
             RoleID: adminRole.RoleID
         };
@@ -56,7 +56,6 @@ export const createFirstAdmin = async (): Promise<void> => {
     }
 };
 
-//run if executed directly
 if (require.main === module) {
     (async () => {
         try {
