@@ -7,13 +7,14 @@ import {
     deleteHotel
 } from '../controllers/hotelController';
 import { authenticateToken } from '../middleware/authMiddleware';
+import { checkPermission } from '../middleware/permisionMiddleware';
 
 const router = Router();
 
 //protected routes
-router.post('/hotels', authenticateToken, createHotel);
-router.put('/hotels/:id', authenticateToken, updateHotel);
-router.delete('/hotels/:id', authenticateToken, deleteHotel);
+router.post('/hotels', authenticateToken, checkPermission('hotels', 'write'), createHotel);
+router.put('/hotels/:id', authenticateToken, checkPermission('hotels', 'write'), updateHotel);
+router.delete('/hotels/:id', authenticateToken, checkPermission('hotels', 'write'), deleteHotel);
 
 //public routes
 router.get('/hotels', getAllHotels);
