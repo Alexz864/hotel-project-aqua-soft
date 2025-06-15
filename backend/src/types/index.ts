@@ -38,17 +38,21 @@ export interface RegionAttributes {
 //review interface
 export interface ReviewAttributes {
     ReviewID: number;
-    GlobalPropertyID: number;
+    HotelID: number;
     ReviewerName: string;
-    ReviewTitle: string;
+    ReviewSubject: string;
     ReviewContent: string;
-    ValueRating: number;
+    ReviewDate: Date;
+    OverallRating: number;
+    CleanlinessRating: number;
     LocationRating: number;
     ServiceRating: number;
-    RoomsRating: number;
-    CleanlinessRating: number;
-    SleepQualityRating: number;
+    ValueRating: number;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
+
+export interface ReviewCreationAttributes extends Omit<ReviewAttributes, 'ReviewID' | 'createdAt' | 'updatedAt'> {}
 
 
 //auth-related interfaces

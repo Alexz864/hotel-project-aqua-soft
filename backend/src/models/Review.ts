@@ -5,16 +5,18 @@ import Hotel from './Hotel';
 
 class Review extends Model<ReviewAttributes> implements ReviewAttributes {
     public ReviewID!: number;
-    public GlobalPropertyID!: number;
+    public HotelID!: number;
     public ReviewerName!: string;
-    public ReviewTitle!: string;
+    public ReviewSubject!: string;
     public ReviewContent!: string;
-    public ValueRating!: number;
+    public ReviewDate!: Date;
+    public OverallRating!: number;
+    public CleanlinessRating!: number;
     public LocationRating!: number;
     public ServiceRating!: number;
-    public RoomsRating!: number;
-    public CleanlinessRating!: number;
-    public SleepQualityRating!: number;
+    public ValueRating!: number;
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
 }
 
 Review.init(
@@ -24,7 +26,7 @@ Review.init(
             primaryKey: true,
             autoIncrement: true
         },
-        GlobalPropertyID: {
+        HotelID: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
@@ -33,10 +35,10 @@ Review.init(
             }
         },
         ReviewerName: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.STRING(50),
             allowNull: false
         },
-        ReviewTitle: {
+        ReviewSubject: {
             type: DataTypes.STRING(200),
             allowNull: false
         },
@@ -44,33 +46,12 @@ Review.init(
             type: DataTypes.TEXT,
             allowNull: false
         },
-
-        ValueRating: {
-            type: DataTypes.DECIMAL(2, 1),
-            allowNull: false,
-            validate: {
-                min: 1.0,
-                max: 5.0
-            }
+        ReviewDate: {
+            type: DataTypes.DATE,
+            allowNull: false
         },
-        LocationRating: {
-            type: DataTypes.DECIMAL(2, 1),
-            allowNull: false,
-            validate: {
-                min: 1.0,
-                max: 5.0
-            }
-        },
-        ServiceRating: {
-            type: DataTypes.DECIMAL(2, 1),
-            allowNull: false,
-            validate: {
-                min: 1.0,
-                max: 5.0
-            }
-        },
-        RoomsRating: {
-            type: DataTypes.DECIMAL(2, 1),
+        OverallRating: {
+            type: DataTypes.DECIMAL(3, 1),
             allowNull: false,
             validate: {
                 min: 1.0,
@@ -78,15 +59,31 @@ Review.init(
             }
         },
         CleanlinessRating: {
-            type: DataTypes.DECIMAL(2, 1),
+            type: DataTypes.DECIMAL(3, 1),
             allowNull: false,
             validate: {
                 min: 1.0,
                 max: 5.0
             }
         },
-        SleepQualityRating: {
-            type: DataTypes.DECIMAL(2, 1),
+        LocationRating: {
+            type: DataTypes.DECIMAL(3, 1),
+            allowNull: false,
+            validate: {
+                min: 1.0,
+                max: 5.0
+            }
+        },
+        ServiceRating: {
+            type: DataTypes.DECIMAL(3, 1),
+            allowNull: false,
+            validate: {
+                min: 1.0,
+                max: 5.0
+            }
+        },
+        ValueRating: {
+            type: DataTypes.DECIMAL(3, 1),
             allowNull: false,
             validate: {
                 min: 1.0,
@@ -98,12 +95,23 @@ Review.init(
         sequelize,
         modelName: 'Review',
         tableName: 'Reviews',
-        timestamps: false
+        timestamps: true,
+        indexes: [
+            {
+                fields: ['HotelID']
+            },
+            {
+                fields: ['OverallRating']
+            },
+            {
+                fields: ['ReviewDate']
+            }
+        ]
     }
 );
 
 //many-to-one relationship
-Review.belongsTo(Hotel, { foreignKey: 'GlobalPropertyID', as: 'hotel' });
-Hotel.hasMany(Review, { foreignKey: 'GlobalPropertyID', as: 'reviews' });
+Review.belongsTo(Hotel, { foreignKey: 'HotelID', targetKey: 'GlobalPropertyID', as: 'hotel' });
+Hotel.hasMany(Review, { foreignKey: 'HotelID', sourceKey: 'GlobalPropertyID', as: 'reviews' });
 
 export default Review;
