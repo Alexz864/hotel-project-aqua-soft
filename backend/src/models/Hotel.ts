@@ -3,6 +3,7 @@ import sequelize from "../config/database";
 import { HotelAttributes, HotelCreationAttributes } from "../types";
 import City from "./City";
 import Region from "./Region";
+import User from "./User";
 
 class Hotel extends Model<HotelAttributes, HotelCreationAttributes> implements HotelAttributes {
     public GlobalPropertyID!: number;
@@ -21,6 +22,7 @@ class Hotel extends Model<HotelAttributes, HotelCreationAttributes> implements H
     public PropertyLatitude!: number;
     public PropertyLongitude!: number;
     public SourceGroupCode!: string;
+    public ManagerUsername!: string;
 }
 
 Hotel.init(
@@ -113,6 +115,15 @@ Hotel.init(
         SourceGroupCode: {
             type: DataTypes.STRING(20),
             allowNull: false
+        },
+
+        ManagerUsername: {
+            type: DataTypes.STRING(50),
+            allowNull: true,
+            references: {
+                model: User,
+                key: 'Username'
+            }
         }
     },
     {
@@ -130,5 +141,9 @@ City.hasMany(Hotel, { foreignKey: 'CityID', as: 'hotels' });
 //many-to-one relationship
 Hotel.belongsTo(Region, { foreignKey: 'PropertyStateProvinceID', as: 'region' });
 Region.hasMany(Hotel, { foreignKey: 'PropertyStateProvinceID', as: 'hotels' });
+
+//many-to-one relationship with managers
+Hotel.belongsTo(User, { foreignKey: 'ManagerUsername', targetKey: 'Username', as: 'manager' });
+User.hasMany(Hotel, { foreignKey: 'ManagerUsername', sourceKey: 'Username', as: 'managedHotels' });
 
 export default Hotel;

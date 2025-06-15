@@ -2,15 +2,15 @@ import { Request, Response } from 'express';
 import db from '../models';
 import { ApiResponse, UserCreationAttributes } from '../types';
 import { generateToken } from '../middleware/authMiddleware';
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 
-const { User, Role } = db;
+const { User, Role, sequelize } = db;
 
 //POST /auth/register
 export const register = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
-    let transaction;
+    const transaction: Transaction = await sequelize.transaction();
+
     try {
-        transaction = await db.sequelize.transaction();
 
         const { username, password, email } = req.body;
 
@@ -97,7 +97,7 @@ export const register = async (req: Request, res: Response<ApiResponse>): Promis
 
         res.status(201).json(response);
     } catch (error) {
-        await transaction?.rollback();
+        await transaction.rollback();
 
         console.error('Error registering user:', error);
         const errorResponse: ApiResponse = {
@@ -111,10 +111,9 @@ export const register = async (req: Request, res: Response<ApiResponse>): Promis
 
 //POST /auth/login
 export const login = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
-    let transaction;
-    try {
-        transaction = await db.sequelize.transaction();
+    const transaction: Transaction = await sequelize.transaction();
 
+    try {
         const { username, password } = req.body;
 
         if (!username || !password) {
@@ -175,7 +174,7 @@ export const login = async (req: Request, res: Response<ApiResponse>): Promise<v
 
         res.json(response);
     } catch (error) {
-        await transaction?.rollback();
+        await transaction.rollback();
 
         console.error('Error during login:', error);
         const errorResponse: ApiResponse = {

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import hotelRoutes from './routes/hotelRoutes';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import managerRoutes from './routes/managerRoutes';
 
 //load environment variables
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api', hotelRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
+app.use('/api', managerRoutes);
 
 //health check route
 app.get('/health', (req: Request, res: Response) => {

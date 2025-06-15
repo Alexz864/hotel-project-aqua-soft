@@ -16,6 +16,7 @@ export interface HotelAttributes {
     PropertyLatitude: number;
     PropertyLongitude: number;
     SourceGroupCode: string;
+    ManagerUsername: string | null;
 }
 
 //interface for creating new hotels(Omit removes 'GlobalPropertyID' because we auto-generate ID in the database)
@@ -88,7 +89,7 @@ export interface PaginationInfo {
 }
 
 
-export interface HotelRequiredFields extends Omit<HotelAttributes, 'GlobalPropertyID' | 'PropertyAddress2' | 'PropertyFaxNumber'>{}
+export interface HotelRequiredFields extends Omit<HotelAttributes, 'GlobalPropertyID' | 'PropertyAddress2' | 'PropertyFaxNumber' | 'ManagerUsername'>{}
 
 
 //extend express Request interface to include user information so that we can use 'req.user.id'

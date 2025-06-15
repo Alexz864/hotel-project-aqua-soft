@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "import-csv": "ts-node src/scripts/import-hotels.ts",
     "scrape-reviews": "ts-node src/scripts/import-reviews.ts",
-    "create-admin": "ts-node src/scripts/create-first-admin.ts"
+    "create-admin": "ts-node src/scripts/create-first-admin.ts",
+    "assign-managers": "ts-node src/scripts/assign-managers.ts"
   },
   "keywords": [],
   "author": "",

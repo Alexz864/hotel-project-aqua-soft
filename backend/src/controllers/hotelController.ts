@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import db from '../models';
 import { ApiResponse, HotelAttributes, HotelCreationAttributes, HotelRequiredFields } from '../types';
 import sequelize from '../config/database';
+import { Transaction } from 'sequelize';
 
-const { Hotel, City, Region } = db;
+const { Hotel, City, Region, User, Role } = db;
 
 //GET /hotels (public)
 export const getAllHotels = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
@@ -37,6 +38,11 @@ export const getAllHotels = async (req: Request, res: Response<ApiResponse>): Pr
                     model: Region,
                     as: 'region',
                     attributes: ['PropertyStateProvinceName']
+                },
+                {
+                    model: User,
+                    as: 'manager',
+                    attributes: ['Username', 'Email']
                 }
             ],
             limit: finalLimit,
@@ -104,6 +110,11 @@ export const getHotelByName = async (req: Request, res: Response<ApiResponse>): 
                     model: Region,
                     as: 'region',
                     attributes: ['PropertyStateProvinceName']
+                },
+                {
+                    model: User,
+                    as: 'manager',
+                    attributes: ['Username', 'Email']
                 }
             ]
         });
@@ -137,10 +148,9 @@ export const getHotelByName = async (req: Request, res: Response<ApiResponse>): 
 
 //POST /hotels (protected)
 export const createHotel = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
-    let transaction;
-    try {
-        transaction = await sequelize.transaction();
+    const transaction: Transaction = await sequelize.transaction();
 
+    try {
         //extract req body and type it as Attributes
         const hotelData = req.body as HotelAttributes;
 
@@ -161,6 +171,17 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
             'SourceGroupCode'
         ];
 
+        if (!hotelData.ManagerUsername || hotelData.ManagerUsername.trim() === '') {
+            await transaction.rollback();
+            const errorResponse: ApiResponse = {
+                success: false,
+                error: 'Manager username is required.',
+                message: 'Please specify a valid manager username for the hotel.'
+            };
+            res.status(400).json(errorResponse);
+            return;
+        }
+
         //filter required fields to find missing ones
         const missingFields = requiredFields
             .filter(field => !hotelData[field] && hotelData[field] !== 0)   //check if field is falsy but allow 0
@@ -170,8 +191,29 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
             await transaction.rollback();
             const errorResponse: ApiResponse = {
                 success: false,
-                error: 'Missing required fields',
+                error: 'Missing required fields.',
                 message: `Required fields: ${missingFields.join(', ')}`
+            };
+            res.status(400).json(errorResponse);
+            return;
+        }
+
+        const manager = await User.findOne({
+            where: { Username: hotelData.ManagerUsername.trim() },
+            include: [{
+                model: Role,
+                as: 'role',
+                where: { RoleName: 'hotel_manager' }
+            }],
+            transaction
+        });
+
+        if (!manager) {
+            await transaction.rollback();
+            const errorResponse: ApiResponse = {
+                success: false,
+                error: 'Invalid manager.',
+                message: `Manager '${hotelData.ManagerUsername}' not found or doesn't have manger role.`
             };
             res.status(400).json(errorResponse);
             return;
@@ -204,8 +246,8 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
             await transaction.rollback();
             const errorResponse: ApiResponse = {
                 success: false,
-                error: 'Invalid CityID',
-                message: `City with ID ${CityID} does not exist`
+                error: 'Invalid CityID.',
+                message: `City with ID ${CityID} does not exist.`
             };
             res.status(400).json(errorResponse);
             return;
@@ -215,8 +257,8 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
             await transaction.rollback();
             const errorResponse: ApiResponse = {
                 success: false,
-                error: 'Invalid PropertyStateProvinceID',
-                message: `Region with ID ${PropertyStateProvinceID} does not exist`
+                error: 'Invalid PropertyStateProvinceID.',
+                message: `Region with ID ${PropertyStateProvinceID} does not exist.`
             };
             res.status(400).json(errorResponse);
             return;
@@ -238,7 +280,8 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
             SabrePropertyRating: typeof SabrePropertyRating === 'string' ? parseFloat(SabrePropertyRating) : SabrePropertyRating!,
             PropertyLatitude: typeof PropertyLatitude === 'string' ? parseFloat(PropertyLatitude) : PropertyLatitude!,
             PropertyLongitude: typeof PropertyLongitude === 'string' ? parseFloat(PropertyLongitude) : PropertyLongitude!,
-            SourceGroupCode: SourceGroupCode!
+            SourceGroupCode: SourceGroupCode!,
+            ManagerUsername: hotelData.ManagerUsername.trim()
         } as HotelCreationAttributes, { transaction });
 
 
@@ -254,6 +297,11 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
                     model: Region,
                     as: 'region',
                     attributes: ['PropertyStateProvinceName']
+                },
+                {
+                    model: User,
+                    as: 'manager',
+                    attributes: ['Username', 'Email']
                 }
             ],
             transaction
@@ -269,7 +317,7 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
 
         res.status(201).json(response);
     } catch (error) {
-        await transaction?.rollback();
+        await transaction.rollback();
 
         console.error('Error creating hotel:', error);
         const errorResponse: ApiResponse = {
@@ -284,10 +332,9 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
 
 //PUT /hotels/:id (protected)
 export const updateHotel = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
-    let transaction;
-    try {
-        transaction = await sequelize.transaction();
+    const transaction: Transaction = await sequelize.transaction();
 
+    try {
         const { id } = req.params;
         const hotelId = parseInt(id);
 
@@ -319,6 +366,30 @@ export const updateHotel = async (req: Request, res: Response<ApiResponse>): Pro
             return;
         }
 
+        //validate manager
+        if (hotelData.ManagerUsername && hotelData.ManagerUsername !== hotel.ManagerUsername) {
+            const manager = await User.findOne({
+                where: { Username: hotelData.ManagerUsername.trim() },
+                include: [{
+                    model: Role,
+                    as: 'role',
+                    where: { RoleName: 'hotel_manager' }
+                }],
+                transaction
+            });
+
+            if (!manager) {
+                await transaction.rollback();
+                const errorResponse: ApiResponse = {
+                    success: false,
+                    error: 'Invalid manager.',
+                    message: `Manager '${hotelData.ManagerUsername}' not found or doesn't have manager role.`
+                };
+                res.status(400).json(errorResponse);
+                return;
+            }
+        }
+
         //destructure the two FK from req body
         const { CityID, PropertyStateProvinceID } = hotelData;
         
@@ -329,8 +400,8 @@ export const updateHotel = async (req: Request, res: Response<ApiResponse>): Pro
                 await transaction.rollback();
                 const errorResponse: ApiResponse = {
                     success: false,
-                    error: 'Invalid CityID',
-                    message: `City with ID ${CityID} does not exist`
+                    error: 'Invalid CityID.',
+                    message: `City with ID ${CityID} does not exist.`
                 };
                 res.status(400).json(errorResponse);
                 return;
@@ -367,6 +438,11 @@ export const updateHotel = async (req: Request, res: Response<ApiResponse>): Pro
                     model: Region,
                     as: 'region',
                     attributes: ['PropertyStateProvinceName']
+                },
+                {
+                    model: User,
+                    as: 'manager',
+                    attributes: ['Username', 'Email']
                 }
             ],
             transaction
@@ -382,7 +458,7 @@ export const updateHotel = async (req: Request, res: Response<ApiResponse>): Pro
 
         res.json(response);
     } catch (error) {
-        transaction?.rollback();
+        transaction.rollback();
         console.error('Error updating hotel:', error);
         const errorResponse: ApiResponse = {
             success: false,
@@ -421,6 +497,11 @@ export const deleteHotel = async (req: Request, res: Response<ApiResponse>): Pro
                     model: Region,
                     as: 'region',
                     attributes: ['PropertyStateProvinceName']
+                },
+                {
+                    model: User,
+                    as: 'manager',
+                    attributes: ['Username', 'Email']
                 }
             ]
         });
@@ -442,7 +523,7 @@ export const deleteHotel = async (req: Request, res: Response<ApiResponse>): Pro
 
         const response: ApiResponse = {
             success: true,
-            message: 'Hotel deleted successfully',
+            message: 'Hotel deleted successfully.',
             data: deletedHotelData
         };
 
@@ -451,8 +532,8 @@ export const deleteHotel = async (req: Request, res: Response<ApiResponse>): Pro
         console.error('Error deleting hotel:', error);
         const errorResponse: ApiResponse = {
             success: false,
-            error: 'Failed to delete hotel',
-            message: error instanceof Error ? error.message : 'Unknown error occurred'
+            error: 'Failed to delete hotel.',
+            message: error instanceof Error ? error.message : 'Unknown error occurred.'
         };
         res.status(500).json(errorResponse);
     }

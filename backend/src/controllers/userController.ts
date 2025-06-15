@@ -572,6 +572,21 @@ export const deleteUser = async (req: Request, res: Response<ApiResponse>): Prom
             return;
         }
 
+        //check if user is managing any hotels
+        const managedHotelsCount = await db.Hotel.count({
+            where: { ManagerUsername: (user as any).Username }
+        });
+
+        if (managedHotelsCount > 0) {
+            const errorResponse: ApiResponse = {
+                success: false,
+                error: 'Cannot delete user.',
+                message: `User is currently managing ${managedHotelsCount} hotels. Please reassign these hotels first.`
+            };
+            res.status(400).json(errorResponse);
+            return;
+        }
+
         //store user data before deletion
         const deletedUserData = user.toJSON();
 
