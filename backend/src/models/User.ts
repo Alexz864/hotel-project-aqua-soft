@@ -37,7 +37,7 @@ User.init(
             type: DataTypes.STRING(100),
             allowNull: false,
             validate: {
-                len: [6, 30]
+                len: [6, 100]
             }
         },
         Email: {
