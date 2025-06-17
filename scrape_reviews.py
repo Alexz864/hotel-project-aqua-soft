@@ -11,9 +11,9 @@ def slug_to_name(slug):
     return ' '.join(word.capitalize() for word in slug.split('-'))
 
 conn = psycopg2.connect(
-    dbname="hotel_db",
+    dbname="hotels_info_db",
     user="postgres",
-    password="admin",
+    password="database123",
     host="localhost",
     port="5432"
 )

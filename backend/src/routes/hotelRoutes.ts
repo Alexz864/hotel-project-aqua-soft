@@ -8,6 +8,7 @@ import {
 } from '../controllers/hotelController';
 import { authenticateToken } from '../middleware/authMiddleware';
 import { checkPermission } from '../middleware/permisionMiddleware';
+import { getHotelsWithReviews } from '../controllers/hotelController';
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.delete('/hotels/:id', authenticateToken, checkPermission('hotels', 'write
 //public routes
 router.get('/hotels', getAllHotels);
 router.get('/hotels/:name', getHotelByName);
+router.get('/hotels-with-reviews', getHotelsWithReviews);
 
 export default router;

@@ -538,3 +538,59 @@ export const deleteHotel = async (req: Request, res: Response<ApiResponse>): Pro
         res.status(500).json(errorResponse);
     }
 };
+
+export const getHotelsWithReviews = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    const hotels = await db.Review.findAll({
+      attributes: [
+        [sequelize.col('hotel.GlobalPropertyID'), 'id'],
+        [sequelize.col('hotel.GlobalPropertyName'), 'name'],
+        [sequelize.col('hotel->city.CityName'), 'city'],
+        [sequelize.fn('AVG', sequelize.col('OverallRating')), 'rating'],
+        [sequelize.fn('COUNT', sequelize.col('ReviewID')), 'reviewCount']
+      ],
+      include: [
+        {
+          model: db.Hotel,
+          as: 'hotel',
+          attributes: [],
+          include: [
+            {
+              model: db.City,
+              as: 'city',
+              attributes: []
+            }
+          ]
+        }
+      ],
+      group: [
+        'hotel.GlobalPropertyID',
+        'hotel.GlobalPropertyName',
+        'hotel->city.CityName'
+      ],
+      offset,
+      limit,
+      raw: true
+    });
+
+    const formattedHotels = hotels.map((hotel: any) => ({
+      ...hotel,
+      rating: hotel.rating ? parseFloat(hotel.rating) : null,
+      reviewCount: Number(hotel.reviewCount)
+    }));
+
+    res.json({ success: true, data: formattedHotels });
+  } catch (error) {
+    console.error('Error fetching hotels with reviews:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve hotels with reviews.',
+      message: error instanceof Error ? error.message : 'Unknown error.'
+    });
+  }
+};
+
