@@ -103,7 +103,7 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-900 pt-24 px-6 flex items-center justify-center">
       <div className="w-full max-w-md">
         {/* Auth Header */}
         <div className="text-center mb-8">
@@ -112,34 +112,34 @@ const AuthPage: React.FC = () => {
               <Hotel className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
             Hotel Sparkling Awards
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-400">
             {isLogin ? 'Sign in to your account' : 'Create your account'}
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+        <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Success Message */}
             {errors.success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-green-900 border border-green-600 text-green-300 px-4 py-3 rounded-lg text-sm">
                 {errors.success}
               </div>
             )}
 
             {/* Error Message */}
             {errors.submit && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-900 border border-red-600 text-red-300 px-4 py-3 rounded-lg text-sm">
                 {errors.submit}
               </div>
             )}
 
             {/* Username Field */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
                 Username
               </label>
               <div className="relative">
@@ -160,21 +160,21 @@ const AuthPage: React.FC = () => {
                       setErrors({ ...errors, username: '' });
                     }
                   }}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`block w-full pl-10 pr-3 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                    errors.username ? 'border-red-500' : 'border-gray-600'
                   }`}
                   placeholder="Enter your username"
                 />
               </div>
               {errors.username && (
-                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.username}</p>
               )}
             </div>
 
             {/* Email Field (Register only) */}
             {!isLogin && (
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                   Email
                 </label>
                 <div className="relative">
@@ -191,21 +191,21 @@ const AuthPage: React.FC = () => {
                         setErrors({ ...errors, email: '' });
                       }
                     }}
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                      errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    className={`block w-full pl-10 pr-3 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                      errors.email ? 'border-red-500' : 'border-gray-600'
                     }`}
                     placeholder="Enter your email"
                   />
                 </div>
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.email}</p>
                 )}
               </div>
             )}
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -226,8 +226,8 @@ const AuthPage: React.FC = () => {
                       setErrors({ ...errors, password: '' });
                     }
                   }}
-                  className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`block w-full pl-10 pr-12 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                    errors.password ? 'border-red-500' : 'border-gray-600'
                   }`}
                   placeholder="Enter your password"
                 />
@@ -237,14 +237,14 @@ const AuthPage: React.FC = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-300" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-300" />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.password}</p>
               )}
             </div>
 
@@ -261,12 +261,12 @@ const AuthPage: React.FC = () => {
 
           {/* Mode Switch */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               {isLogin ? "Don't have an account?" : 'Already have an account?'}
               <button
                 type="button"
                 onClick={handleModeSwitch}
-                className="ml-1 text-primary-600 hover:text-primary-700 font-medium focus:outline-none focus:underline"
+                className="ml-1 text-blue-400 hover:text-blue-300 font-medium focus:outline-none focus:underline"
               >
                 {isLogin ? 'Sign up' : 'Sign in'}
               </button>
@@ -275,7 +275,7 @@ const AuthPage: React.FC = () => {
         </div>
 
         {/* Auth Footer */}
-        <div className="mt-8 text-center text-sm text-gray-500">
+        <div className="mt-8 text-center text-sm text-gray-400">
           <p>© 2025 Hotel Sparkling Awards. All rights reserved.</p>
         </div>
       </div>
