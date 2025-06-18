@@ -74,7 +74,7 @@ const AuthPage: React.FC = () => {
       if (isLogin) {
         const result = await login(loginData);
         if (result.success) {
-          navigate('/success');
+          navigate('/');
         } else {
           setErrors({ submit: result.error || 'Login failed' });
         }
@@ -103,17 +103,17 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Auth Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-primary-600 p-3 rounded-full">
+            <div className="bg-blue-600 p-3 rounded-full">
               <Hotel className="w-8 h-8 text-white" />
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Hotel Booking
+            Hotel Sparkling Awards
           </h1>
           <p className="text-gray-600">
             {isLogin ? 'Sign in to your account' : 'Create your account'}
@@ -160,7 +160,7 @@ const AuthPage: React.FC = () => {
                       setErrors({ ...errors, username: '' });
                     }
                   }}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                     errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="Enter your username"
@@ -191,7 +191,7 @@ const AuthPage: React.FC = () => {
                         setErrors({ ...errors, email: '' });
                       }
                     }}
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                       errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
                     }`}
                     placeholder="Enter your email"
@@ -226,7 +226,7 @@ const AuthPage: React.FC = () => {
                       setErrors({ ...errors, password: '' });
                     }
                   }}
-                  className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
+                  className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                     errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="Enter your password"
@@ -252,7 +252,7 @@ const AuthPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {isLogin ? 'Sign In' : 'Create Account'}
@@ -276,7 +276,7 @@ const AuthPage: React.FC = () => {
 
         {/* Auth Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>© 2025 Hotel Booking. All rights reserved.</p>
+          <p>© 2025 Hotel Sparkling Awards. All rights reserved.</p>
         </div>
       </div>
     </div>

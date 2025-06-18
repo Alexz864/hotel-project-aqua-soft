@@ -1,4 +1,3 @@
-// src/pages/MainPage.tsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import HotelCard from "../components/HotelCard";
@@ -69,7 +68,7 @@ const MainPage = () => {
       </main>
 
       <footer className="mt-12 text-center text-sm text-gray-400 py-6">
-        © 2025 Hotel Booking. All rights reserved.
+        © 2025 Hotel Sparkling Awards. All rights reserved.
       </footer>
     </div>
   );

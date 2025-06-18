@@ -594,3 +594,66 @@ export const getHotelsWithReviews = async (req: Request, res: Response<ApiRespon
   }
 };
 
+
+export const getHotelDetailsWithReviews = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const hotelId = parseInt(req.params.id);
+    if (isNaN(hotelId)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid hotel ID',
+        message: 'ID must be a number.'
+      });
+      return;
+    }
+ 
+    const hotel = await db.Hotel.findByPk(hotelId, {
+      include: [
+        { model: db.City, as: 'city', attributes: ['CityName', 'Country'] },
+        { model: db.Region, as: 'region', attributes: ['PropertyStateProvinceName'] },
+        { model: db.User, as: 'manager', attributes: ['Username', 'Email'] }
+      ]
+    });
+ 
+    if (!hotel) {
+      res.status(404).json({
+        success: false,
+        error: 'Hotel not found.'
+      });
+      return;
+    }
+ 
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+ 
+    const { count, rows: reviews } = await db.Review.findAndCountAll({
+      where: { HotelID: hotelId },
+      limit,
+      offset,
+      order: [['ReviewDate', 'DESC']]
+    });
+ 
+    res.status(200).json({
+      success: true,
+      data: {
+        hotel,
+        reviews
+      },
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(count / limit),
+        totalItems: count,
+        hasNextPage: page * limit < count,
+        hasPrevPage: page > 1
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};

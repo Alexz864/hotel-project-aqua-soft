@@ -2,18 +2,23 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './pages/AuthPage';
+import MainPage from './pages/MainPage';
+import UsersPage from './pages/UsersPage'
+import Navbar from './components/Navbar';
+import AdminRoute from './components/AdminRoute';
 import { Loader2 } from 'lucide-react';
+import DetailsPage from './pages/DetailsPage';
 
-//protected route component (placeholder for dashboard)
+//protected route component (protected routes)
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-4" />
+          <p className="text-gray-300">Loading...</p>
         </div>
       </div>
     );
@@ -22,56 +27,30 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-//public route component (redirects to success page if authenticated)
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+//auth only route component (redirects to main page if authenticated)
+const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-4" />
+          <p className="text-gray-300">Loading...</p>
         </div>
       </div>
     );
   }
 
-  return isAuthenticated ? <Navigate to="/success" replace /> : <>{children}</>;
+  return isAuthenticated ? <Navigate to="/" replace /> : <>{children}</>;
 };
 
-//temporary success page (replace with dashboard)
-const SuccessPage: React.FC = () => {
-  const { user, logout } = useAuth();
-
-const App = () => {
+//layout component for all pages
+const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 max-w-md w-full text-center">
-        <div className="mb-6">
-          <div className="bg-green-100 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Login Successful!</h1>
-          <p className="text-gray-600 mb-4">
-            Welcome back, <span className="font-medium">{user?.username}</span>
-          </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
-            <p className="text-sm text-blue-700">
-              Success
-            </p>
-          </div>
-        </div>
-        
-        <button
-          onClick={logout}
-          className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
-        >
-          Logout
-        </button>
-      </div>
+    <div className="min-h-screen bg-gray-900">
+      <Navbar />
+      {children}
     </div>
   );
 };
@@ -81,29 +60,50 @@ const AppRouter: React.FC = () => {
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
+        {/*login page - only accessible when not authenticated */}
         <Route 
           path="/login" 
           element={
-            <PublicRoute>
+            <AuthOnlyRoute>
               <AuthPage />
-            </PublicRoute>
+            </AuthOnlyRoute>
           } 
         />
         
-        {/* Protected Routes */}
+        {/*main page - accessible to everyone */}
         <Route 
-          path="/success" 
+          path="/" 
           element={
-            <ProtectedRoute>
-              <SuccessPage />
-            </ProtectedRoute>
+            <AppLayout>
+              <MainPage />
+            </AppLayout>
           } 
         />
 
-        {/* Default Redirects */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/*hotel details page - accessible to everyone */}
+        <Route 
+          path="/hotels/:id" 
+          element={
+            <AppLayout>
+              <DetailsPage />
+            </AppLayout>
+          } 
+        />
+
+        {/*users page - admin only */}
+        <Route 
+          path="/users" 
+          element={
+            <AppLayout>
+              <AdminRoute>
+                <UsersPage />
+              </AdminRoute>
+            </AppLayout>
+          } 
+        />
+
+        {/*redirect to main page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

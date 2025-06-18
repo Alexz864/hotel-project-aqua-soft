@@ -433,6 +433,7 @@ export const updateUserRole = async (req: Request, res: Response<ApiResponse>): 
         const userId = parseInt(id);
 
         if (isNaN(userId)) {
+            await transaction.rollback();
             const errorResponse: ApiResponse = {
                 success: false,
                 error: 'Invalid user ID.',
@@ -443,6 +444,7 @@ export const updateUserRole = async (req: Request, res: Response<ApiResponse>): 
         }
 
         if (!roleName) {
+            await transaction.rollback();
             const errorResponse: ApiResponse = {
                 success: false,
                 error: 'Role is required.'
@@ -451,7 +453,7 @@ export const updateUserRole = async (req: Request, res: Response<ApiResponse>): 
             return;
         }
 
-        //find user
+        //find user (using transaction)
         const user = await User.findByPk(userId, { transaction });
         if (!user) {
             await transaction.rollback();
@@ -464,12 +466,14 @@ export const updateUserRole = async (req: Request, res: Response<ApiResponse>): 
             return;
         }
 
-        //find role
+        //find role (using transaction)
         const role = await Role.findOne({
-            where: { RoleName: roleName }
+            where: { RoleName: roleName },
+            transaction
         });
 
         if (!role) {
+            await transaction.rollback();
             const errorResponse: ApiResponse = {
                 success: false,
                 error: 'Invalid role.',
@@ -481,6 +485,7 @@ export const updateUserRole = async (req: Request, res: Response<ApiResponse>): 
 
         //prevent admin from demoting themselves
         if (req.user && parseInt(req.user.id) === userId && req.user.role === 'admin' && roleName !== 'admin') {
+            await transaction.rollback();
             const errorResponse: ApiResponse = {
                 success: false,
                 error: 'Cannot demote yourself.',
@@ -490,17 +495,18 @@ export const updateUserRole = async (req: Request, res: Response<ApiResponse>): 
             return;
         }
 
-        //update user role
-        await user.update({ RoleID: role.RoleID });
+        //update user role (using transaction)
+        await user.update({ RoleID: role.RoleID }, { transaction });
 
-        //fetch updated user with role info
+        //fetch updated user with role info (using transaction)
         const updatedUser = await User.findByPk(userId, {
             include: [{
                 model: Role,
                 as: 'role',
                 attributes: ['RoleName']
             }],
-            attributes: ['UserID', 'Username', 'Email']
+            attributes: ['UserID', 'Username', 'Email'],
+            transaction
         });
 
         await transaction.commit();
@@ -513,6 +519,8 @@ export const updateUserRole = async (req: Request, res: Response<ApiResponse>): 
 
         res.json(response);
     } catch (error) {
+        await transaction.rollback();
+        
         console.error('Error updating user role:', error);
         const errorResponse: ApiResponse = {
             success: false,
