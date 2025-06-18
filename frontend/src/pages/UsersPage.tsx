@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../services/api';
 import { type User, type FormErrors } from '../types';
-import { Search, Plus, Edit, Trash2, UserCheck, X, Loader2, User as UserIcon } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, X, Loader2, User as UserIcon } from 'lucide-react';
 
 interface UserFormData {
   username: string;
