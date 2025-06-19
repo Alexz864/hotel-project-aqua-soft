@@ -155,7 +155,8 @@ export const login = async (req: Request, res: Response<ApiResponse>): Promise<v
         const token = generateToken({
             id: user.UserID.toString(),
             email: user.Email,
-            role: (user as any).role.RoleName
+            role: (user as any).role.RoleName, 
+            username: user.Username
         });
 
         const response: ApiResponse = {

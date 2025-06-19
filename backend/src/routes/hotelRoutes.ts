@@ -14,6 +14,7 @@ import {
 } from '../controllers/hotelController';
 import { authenticateToken } from '../middleware/authMiddleware';
 import { checkPermission } from '../middleware/permisionMiddleware';
+import { getHotelsForManager } from '../controllers/hotelController';
 
 const router = Router();
 
@@ -25,12 +26,13 @@ router.get('/hotels-with-reviews-and-managers', authenticateToken, checkPermissi
 router.get('/cities', authenticateToken, checkPermission('hotels', 'write'), getAllCities);
 router.get('/states-provinces', authenticateToken, checkPermission('hotels', 'write'), getAllStatesProvinces);
 
+
 //public routes
+router.get('/hotels/manager', authenticateToken, getHotelsForManager);
 router.get('/hotels', getAllHotels);
 router.get('/hotels/:id', getHotelById);
 router.get('/hotels/:name', getHotelByName);
 router.get('/hotels-with-reviews', getHotelsWithReviews);
 router.get('/hotels/:id/details', getHotelDetailsWithReviews);
-
 
 export default router;

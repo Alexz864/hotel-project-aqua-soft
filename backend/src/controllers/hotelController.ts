@@ -1,9 +1,15 @@
 import { Request, Response } from 'express';
 import db from '../models';
 import { ApiResponse, HotelAttributes, HotelCreationAttributes, HotelRequiredFields } from '../types';
-import { Transaction, Op } from 'sequelize';
+import { Transaction, Op, literal } from 'sequelize';
+import { UserPayload } from '../types'; 
 
 const { Hotel, City, Region, User, Role, sequelize } = db;
+
+interface AuthenticatedRequest extends Request {
+  user?: UserPayload;
+}
+
 
 //GET /hotels (public)
 export const getAllHotels = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
@@ -847,4 +853,77 @@ export const getAllStatesProvinces = async (req: Request, res: Response<ApiRespo
         };
         res.status(500).json(errorResponse);
     }
+};
+
+export const getHotelsForManager = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const managerUsername = req.user?.username;
+
+    if (!managerUsername) {
+      res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+        message: 'Manager username not found in token.'
+      });
+      return;
+    }
+
+    const hotels = await Hotel.findAll({
+      where: { ManagerUsername: managerUsername },
+      include: [
+        { model: City, as: 'city', attributes: ['CityName'] },
+        { model: Region, as: 'region', attributes: ['PropertyStateProvinceName'] }
+      ],
+      attributes: {
+        include: [
+          [
+            literal(`(
+              SELECT AVG("OverallRating")
+              FROM "Reviews"
+              WHERE "Reviews"."HotelID" = "Hotel"."GlobalPropertyID"
+            )`),
+            'rating'
+          ],
+          [
+            literal(`(
+              SELECT COUNT(*)
+              FROM "Reviews"
+              WHERE "Reviews"."HotelID" = "Hotel"."GlobalPropertyID"
+            )`),
+            'reviewCount'
+          ]
+        ]
+      },
+      raw: true,
+      nest: true
+    });
+
+    // transformă datele pentru frontend
+    const formatted = hotels.map((h: any) => ({
+      id: h.GlobalPropertyID,
+      name: h.GlobalPropertyName,
+      city: h.city?.CityName ?? 'N/A',
+      rating: h.rating ? parseFloat(h.rating) : null,
+      reviewCount: Number(h.reviewCount),
+      DistanceToTheAirport: h.DistanceToTheAirport ?? null,
+      RoomsNumber: h.RoomsNumber ?? null,
+      HotelStars: h.HotelStars ?? null,
+      NumberOfFloors: h.NumberOfFloors ?? null
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: formatted
+    });
+  } catch (error) {
+    console.error('Error fetching hotels for manager:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve hotels.',
+      message: error instanceof Error ? error.message : 'Unknown error.'
+    });
+  }
 };

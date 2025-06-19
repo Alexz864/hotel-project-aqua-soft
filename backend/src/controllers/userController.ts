@@ -566,7 +566,8 @@ export const deleteUser = async (req: Request, res: Response<ApiResponse>): Prom
                 as: 'role',
                 attributes: ['RoleName']
             }],
-            attributes: ['UserID', 'Username', 'Email']
+            attributes: ['UserID', 'Username', 'Email'],
+            transaction
         });
 
         if (!user) {
@@ -582,7 +583,8 @@ export const deleteUser = async (req: Request, res: Response<ApiResponse>): Prom
 
         //check if user is managing any hotels
         const managedHotelsCount = await db.Hotel.count({
-            where: { ManagerUsername: (user as any).Username }
+            where: { ManagerUsername: (user as any).Username },
+            transaction
         });
 
         if (managedHotelsCount > 0) {
