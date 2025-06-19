@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import db from '../models';
 import { ApiResponse, HotelAttributes, HotelCreationAttributes, HotelRequiredFields } from '../types';
-import sequelize from '../config/database';
-import { Transaction } from 'sequelize';
+import { Transaction, Op } from 'sequelize';
 
-const { Hotel, City, Region, User, Role } = db;
+const { Hotel, City, Region, User, Role, sequelize } = db;
 
 //GET /hotels (public)
 export const getAllHotels = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
@@ -539,6 +538,7 @@ export const deleteHotel = async (req: Request, res: Response<ApiResponse>): Pro
     }
 };
 
+
 export const getHotelsWithReviews = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -656,4 +656,195 @@ export const getHotelDetailsWithReviews = async (req: Request, res: Response): P
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
+};
+
+
+export const getHotelById = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const hotelId = parseInt(id);
+
+        if (isNaN(hotelId)) {
+            const errorResponse: ApiResponse = {
+                success: false,
+                error: 'Invalid hotel ID.',
+                message: 'Hotel ID must be a valid number.'
+            };
+            res.status(400).json(errorResponse);
+            return;
+        }
+
+        const hotel = await Hotel.findByPk(hotelId, {
+            include: [
+                {
+                    model: City,
+                    as: 'city',
+                    attributes: ['CityName', 'Country']
+                },
+                {
+                    model: Region,
+                    as: 'region',
+                    attributes: ['PropertyStateProvinceName']
+                },
+                {
+                    model: User,
+                    as: 'manager',
+                    attributes: ['Username', 'Email']
+                }
+            ]
+        });
+
+        if (!hotel) {
+            const errorResponse: ApiResponse = {
+                success: false,
+                error: 'Hotel not found.',
+                message: `No hotel found with ID: ${hotelId}.`
+            };
+            res.status(404).json(errorResponse);
+            return;
+        }
+
+        const response: ApiResponse = {
+            success: true,
+            data: hotel
+        };
+
+        res.json(response);
+    } catch (error) {
+        console.error('Error fetching hotel by ID:', error);
+        const errorResponse: ApiResponse = {
+            success: false,
+            error: 'Failed to retrieve hotel.',
+            message: error instanceof Error ? error.message : 'Unknown error occurred.'
+        };
+        res.status(500).json(errorResponse);
+    }
+};
+
+
+export const getHotelsWithReviewsAndManagers = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    const hotels = await db.Review.findAll({
+      attributes: [
+        [sequelize.col('hotel.GlobalPropertyID'), 'id'],
+        [sequelize.col('hotel.GlobalPropertyName'), 'name'],
+        [sequelize.col('hotel->city.CityName'), 'city'],
+        [sequelize.col('hotel.ManagerUsername'), 'manager'],
+        [sequelize.fn('AVG', sequelize.col('OverallRating')), 'rating'],
+        [sequelize.fn('COUNT', sequelize.col('ReviewID')), 'reviewCount']
+      ],
+      include: [
+        {
+          model: db.Hotel,
+          as: 'hotel',
+          attributes: [],
+          include: [
+            {
+              model: db.City,
+              as: 'city',
+              attributes: []
+            }
+          ]
+        }
+      ],
+      group: [
+        'hotel.GlobalPropertyID',
+        'hotel.GlobalPropertyName',
+        'hotel->city.CityName',
+        'hotel.ManagerUsername'
+      ],
+      offset,
+      limit,
+      raw: true
+    });
+
+    const formattedHotels = hotels.map((hotel: any) => ({
+      ...hotel,
+      rating: hotel.rating ? parseFloat(hotel.rating) : null,
+      reviewCount: Number(hotel.reviewCount)
+    }));
+
+    res.json({ success: true, data: formattedHotels });
+  } catch (error) {
+    console.error('Error fetching hotels with reviews and managers:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve hotels with reviews and managers.',
+      message: error instanceof Error ? error.message : 'Unknown error.'
+    });
+  }
+};
+
+
+export const getAllCities = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
+    try {
+        const search = req.query.search as string || '';
+        const limit = parseInt(req.query.limit as string) || 50;
+        
+        const whereClause = search ? {
+            [Op.or]: [
+                { CityName: { [Op.iLike]: `%${search}%` } },
+                { Country: { [Op.iLike]: `%${search}%` } }
+            ]
+        } : {};
+
+        const cities = await City.findAll({
+            where: whereClause,
+            attributes: ['CityID', 'CityName', 'Country'],
+            order: [['CityName', 'ASC'], ['Country', 'ASC']],
+            limit
+        });
+
+        const response: ApiResponse = {
+            success: true,
+            data: cities
+        };
+
+        res.json(response);
+    } catch (error) {
+        console.error('Error fetching cities:', error);
+        const errorResponse: ApiResponse = {
+            success: false,
+            error: 'Failed to retrieve cities.',
+            message: error instanceof Error ? error.message : 'Unknown error occurred.'
+        };
+        res.status(500).json(errorResponse);
+    }
+};
+
+export const getAllStatesProvinces = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
+    try {
+        const search = req.query.search as string || '';
+        const limit = parseInt(req.query.limit as string) || 50;
+        
+        const whereClause = search ? {
+            PropertyStateProvinceName: { [Op.iLike]: `%${search}%` }
+        } : {};
+
+        const statesProvinces = await Region.findAll({
+            where: whereClause,
+            attributes: ['PropertyStateProvinceID', 'PropertyStateProvinceName'],
+            order: [['PropertyStateProvinceName', 'ASC']],
+            limit
+        });
+
+        const response: ApiResponse = {
+            success: true,
+            data: statesProvinces
+        };
+
+        res.json(response);
+    } catch (error) {
+        console.error('Error fetching states/provinces:', error);
+        const errorResponse: ApiResponse = {
+            success: false,
+            error: 'Failed to retrieve states/provinces.',
+            message: error instanceof Error ? error.message : 'Unknown error occurred.'
+        };
+        res.status(500).json(errorResponse);
+    }
 };

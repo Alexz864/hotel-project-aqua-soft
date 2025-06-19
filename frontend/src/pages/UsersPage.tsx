@@ -89,7 +89,7 @@ const UsersPage: React.FC = () => {
 
     try {
       if (editingUser) {
-        // Update user
+        //update user
         const updateData: any = {
           username: formData.username,
           email: formData.email,
@@ -108,7 +108,7 @@ const UsersPage: React.FC = () => {
           setErrors({ submit: result.error || 'Failed to update user' });
         }
       } else {
-        // Create user
+        //create user
         const result = await apiService.createUser(formData);
         if (result.success) {
           await fetchUsers();

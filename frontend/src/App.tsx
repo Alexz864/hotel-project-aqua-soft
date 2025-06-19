@@ -3,16 +3,19 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './pages/AuthPage';
 import MainPage from './pages/MainPage';
-import UsersPage from './pages/UsersPage'
+import UsersPage from './pages/UsersPage';
+import HotelsManagementPage from './pages/HotelsManagementPage';
 import Navbar from './components/Navbar';
+import DataOperatorRoute from './components/DataOperatorRoute';
 import AdminRoute from './components/AdminRoute';
 import { Loader2 } from 'lucide-react';
 import DetailsPage from './pages/DetailsPage';
+import ManagerDashboard from './pages/ManagerDashboard';
 
-//protected route component (protected routes)
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
-
+ 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -23,7 +26,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
       </div>
     );
   }
-
+ 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
@@ -45,7 +48,7 @@ const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   return isAuthenticated ? <Navigate to="/" replace /> : <>{children}</>;
 };
 
-//layout component for all pages
+//navbar component for all pages
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-900">
@@ -60,7 +63,7 @@ const AppRouter: React.FC = () => {
   return (
     <Router>
       <Routes>
-        {/*login page - only accessible when not authenticated */}
+        {/* login page - only accessible when not authenticated */}
         <Route 
           path="/login" 
           element={
@@ -70,7 +73,7 @@ const AppRouter: React.FC = () => {
           } 
         />
         
-        {/*main page - accessible to everyone */}
+        {/* main page - accessible to everyone */}
         <Route 
           path="/" 
           element={
@@ -80,7 +83,7 @@ const AppRouter: React.FC = () => {
           } 
         />
 
-        {/*hotel details page - accessible to everyone */}
+        {/* hotel details page - accessible to everyone */}
         <Route 
           path="/hotels/:id" 
           element={
@@ -90,7 +93,30 @@ const AppRouter: React.FC = () => {
           } 
         />
 
-        {/*users page - admin only */}
+        <Route
+          path="/manager"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <ManagerDashboard />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* hotels management page - data operators and admins only */}
+        <Route 
+          path="/hotels-management" 
+          element={
+            <AppLayout>
+              <DataOperatorRoute>
+                <HotelsManagementPage />
+              </DataOperatorRoute>
+            </AppLayout>
+          } 
+        />
+
+        {/* users page - admin only */}
         <Route 
           path="/users" 
           element={

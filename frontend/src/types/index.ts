@@ -1,3 +1,4 @@
+
 //API Response types
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -48,6 +49,19 @@ export interface User {
   };
 }
 
+//location types
+export interface City {
+  CityID: number;
+  CityName: string;
+  Country: string;
+}
+
+export interface StateProvince {
+  PropertyStateProvinceID: number;
+  PropertyStateProvinceName: string;
+  Country: string;
+}
+
 //hotel types
 export interface Hotel {
   GlobalPropertyID: number;
@@ -96,7 +110,7 @@ export interface HotelCreationRequest {
   PropertyLatitude: number;
   PropertyLongitude: number;
   SourceGroupCode: string;
-  ManagerUsername: string;
+  ManagerUsername?: string;
 }
 
 //form validation types

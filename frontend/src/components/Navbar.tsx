@@ -9,6 +9,9 @@ const Navbar = () => {
   };
 
   const isAdmin = user?.role === 'admin';
+  const isDataOperator = user?.role === 'data_operator';
+  const isHotelManager = user?.role === 'hotel_manager';
+  const canManageHotels = isAdmin || isDataOperator;
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-blue-600 text-white shadow-md">
@@ -25,6 +28,20 @@ const Navbar = () => {
               <span className="text-sm text-blue-100">
                 Welcome, {user?.username}
               </span>
+              {isHotelManager && (
+                <Link to="/manager">
+                  <button className="bg-gray-800 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-700 transition duration-200">
+                    My Hotels
+                  </button>
+                </Link>
+              )}
+              {canManageHotels && (
+                <Link to="/hotels-management">
+                  <button className="bg-gray-800 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-700 transition duration-200">
+                    Hotels
+                  </button>
+                </Link>
+              )}
               {isAdmin && (
                 <Link to="/users">
                   <button className="bg-gray-800 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-700 transition duration-200">

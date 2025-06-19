@@ -274,7 +274,7 @@ const AuthPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Auth Footer */}
+        {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-400">
           <p>© 2025 Hotel Sparkling Awards. All rights reserved.</p>
         </div>

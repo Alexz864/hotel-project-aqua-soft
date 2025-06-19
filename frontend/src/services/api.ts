@@ -4,6 +4,7 @@ import { type ApiResponse, type LoginRequest, type RegisterRequest, type AuthRes
 class ApiService {
   private api: AxiosInstance;
 
+  //create Axios instance with base url
   constructor() {
     this.api = axios.create({
       baseURL: '/api',
@@ -59,6 +60,11 @@ class ApiService {
     return response.data;
   }
 
+  async getHotelById(id: number): Promise<ApiResponse<Hotel>> {
+    const response: AxiosResponse<ApiResponse<Hotel>> = await this.api.get(`/hotels/${id}`);
+    return response.data;
+  }
+
   async getHotelByName(name: string): Promise<ApiResponse<Hotel>> {
     const response: AxiosResponse<ApiResponse<Hotel>> = await this.api.get(`/hotels/${encodeURIComponent(name)}`);
     return response.data;
@@ -79,6 +85,11 @@ class ApiService {
     return response.data;
   }
 
+  async searchHotels(searchTerm: string, page = 1, limit = 50): Promise<ApiResponse<Hotel[]>> {
+    const response: AxiosResponse<ApiResponse<Hotel[]>> = await this.api.get(`/hotels/search?q=${encodeURIComponent(searchTerm)}&page=${page}&limit=${limit}`);
+    return response.data;
+  }
+
 
   //manager endpoints
   async getMyHotels(page = 1, limit = 50): Promise<ApiResponse<Hotel[]>> {
@@ -87,7 +98,7 @@ class ApiService {
   }
 
 
-  //user endpoints (admin only)
+  //user endpoints
   async getUsers(page = 1, limit = 50, search?: string): Promise<ApiResponse> {
     let url = `/users?page=${page}&limit=${limit}`;
     if (search) {
@@ -117,10 +128,13 @@ class ApiService {
     return response.data;
   }
 
-  
-  //health check
-  async healthCheck(): Promise<any> {
-    const response = await this.api.get('/health');
+  async getCities(): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.get('/cities');
+    return response.data;
+  }
+
+  async getStatesProvinces(): Promise<ApiResponse> {
+    const response: AxiosResponse<ApiResponse> = await this.api.get('/states-provinces');
     return response.data;
   }
 }

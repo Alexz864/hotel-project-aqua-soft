@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import db from '../models';
 import { ApiResponse } from '../types';
 import { Transaction } from 'sequelize';
-
+ 
 const { Hotel, City, Region, User, Role, sequelize } = db;
-
-//GET /my-hotels (managers only)
+ 
+// GET /my-hotels (managers only)
 export const getMyHotels = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
     try {
         if (!req.user) {
@@ -16,15 +16,13 @@ export const getMyHotels = async (req: Request, res: Response<ApiResponse>): Pro
             res.status(401).json(errorResponse);
             return;
         }
-
-        //basic pagination
+ 
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 50;
         const offset = (page - 1) * limit;
         const maxLimit = 200;
         const finalLimit = Math.min(limit, maxLimit);
-
-        //find user's username from their ID
+ 
         const currentUser = await User.findByPk(req.user.id);
         if (!currentUser) {
             const errorResponse: ApiResponse = {
@@ -34,12 +32,20 @@ export const getMyHotels = async (req: Request, res: Response<ApiResponse>): Pro
             res.status(404).json(errorResponse);
             return;
         }
-
-        //find hotels managed by this user
+ 
         const userHotels = await Hotel.findAndCountAll({
-            where: { 
-                ManagerUsername: currentUser.Username 
+            where: {
+                ManagerUsername: currentUser.Username
             },
+            attributes: [
+                'GlobalPropertyID',
+                'GlobalPropertyName',
+                'SabrePropertyRating',
+                'DistanceToTheAirport',
+                'RoomsNumber',
+                'HotelStars',
+                'FloorsNumber'
+            ],
             include: [
                 {
                     model: City,
@@ -61,9 +67,9 @@ export const getMyHotels = async (req: Request, res: Response<ApiResponse>): Pro
             offset,
             order: [['GlobalPropertyName', 'ASC']]
         });
-
+ 
         const totalPages = Math.ceil(userHotels.count / finalLimit);
-
+ 
         const response: ApiResponse = {
             success: true,
             data: userHotels.rows,
@@ -76,7 +82,7 @@ export const getMyHotels = async (req: Request, res: Response<ApiResponse>): Pro
                 hasPrevPage: page > 1
             }
         };
-
+ 
         res.json(response);
     } catch (error) {
         console.error('Error fetching manager hotels:', error);
@@ -88,16 +94,16 @@ export const getMyHotels = async (req: Request, res: Response<ApiResponse>): Pro
         res.status(500).json(errorResponse);
     }
 };
-
-//PUT /reassign-hotel/:hotelId (admin only)
+ 
+// PUT /reassign-hotel/:hotelId (admin only)
 export const reassignHotel = async (req: Request, res: Response<ApiResponse>): Promise<void> => {
     const transaction: Transaction = await sequelize.transaction();
-
+ 
     try {
         const { hotelId } = req.params;
         const { newManagerUsername } = req.body;
         const hotelIdNum = parseInt(hotelId);
-
+ 
         if (isNaN(hotelIdNum)) {
             const errorResponse: ApiResponse = {
                 success: false,
@@ -107,7 +113,7 @@ export const reassignHotel = async (req: Request, res: Response<ApiResponse>): P
             res.status(400).json(errorResponse);
             return;
         }
-
+ 
         if (!newManagerUsername) {
             const errorResponse: ApiResponse = {
                 success: false,
@@ -116,10 +122,9 @@ export const reassignHotel = async (req: Request, res: Response<ApiResponse>): P
             res.status(400).json(errorResponse);
             return;
         }
-
-        //verify hotel exists
+ 
         const hotel = await Hotel.findByPk(hotelIdNum, { transaction });
-
+ 
         if (!hotel) {
             await transaction.rollback();
             const errorResponse: ApiResponse = {
@@ -130,8 +135,7 @@ export const reassignHotel = async (req: Request, res: Response<ApiResponse>): P
             res.status(404).json(errorResponse);
             return;
         }
-
-        //verify new manager exists and has manager role
+ 
         const newManager = await User.findOne({
             where: { Username: newManagerUsername },
             include: [{
@@ -141,7 +145,7 @@ export const reassignHotel = async (req: Request, res: Response<ApiResponse>): P
             }],
             transaction
         });
-
+ 
         if (!newManager) {
             await transaction.rollback();
             const errorResponse: ApiResponse = {
@@ -152,13 +156,11 @@ export const reassignHotel = async (req: Request, res: Response<ApiResponse>): P
             res.status(400).json(errorResponse);
             return;
         }
-
+ 
         const oldManagerUsername = hotel.ManagerUsername;
-
-        //reassign hotel to new manager
+ 
         await hotel.update({ ManagerUsername: newManagerUsername }, { transaction });
-
-        //fetch updated hotel with relationships
+ 
         const updatedHotel = await Hotel.findByPk(hotelIdNum, {
             include: [
                 {
@@ -179,9 +181,9 @@ export const reassignHotel = async (req: Request, res: Response<ApiResponse>): P
             ],
             transaction
         });
-
+ 
         await transaction.commit();
-
+ 
         const response: ApiResponse = {
             success: true,
             message: 'Hotel reassigned successfully.',
@@ -191,11 +193,11 @@ export const reassignHotel = async (req: Request, res: Response<ApiResponse>): P
                 newManager: newManagerUsername
             }
         };
-
+ 
         res.json(response);
     } catch (error) {
         await transaction.rollback();
-
+ 
         console.error('Error reassigning hotel:', error);
         const errorResponse: ApiResponse = {
             success: false,

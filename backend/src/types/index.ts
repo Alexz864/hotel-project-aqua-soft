@@ -17,25 +17,29 @@ export interface HotelAttributes {
     PropertyLongitude: number;
     SourceGroupCode: string;
     ManagerUsername: string | null;
+    DistanceToTheAirport?: number;
+    RoomsNumber?: number;
+    FloorsNumber?: number;
+    HotelStars?: number;
 }
-
+ 
 //interface for creating new hotels(Omit removes 'GlobalPropertyID' because we auto-generate ID in the database)
 export interface HotelCreationAttributes extends Omit<HotelAttributes, 'GlobalPropertyID'> {}
-
+ 
 //city interface
 export interface CityAttributes {
     CityID: number;
     CityName: string;
     Country: string;
 }
-
+ 
 //region interface
 export interface RegionAttributes {
     PropertyStateProvinceID: number;
     PropertyStateProvinceName: string;
 }
-
-
+ 
+ 
 //review interface
 export interface ReviewAttributes {
     ReviewID: number;
@@ -49,26 +53,32 @@ export interface ReviewAttributes {
     LocationRating: number;
     ServiceRating: number;
     ValueRating: number;
+    FoodBeverage: number;
+    SleepQuality: number;
+    InternetQuality: number;
+    AmenitiesRating: number;
+    helpfulYes?: number;
+    helpfulNo?: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
-
+ 
 export interface ReviewCreationAttributes extends Omit<ReviewAttributes, 'ReviewID' | 'createdAt' | 'updatedAt'> {}
-
-
+ 
+ 
 //auth-related interfaces
 export interface UserPayload {
     id: string;
     email: string;
     role?: string;
 }
-
+ 
 export interface JWTPayload extends UserPayload {
     iat?: number;   //issued at
     exp?: number;   //expires at
 }
-
-
+ 
+ 
 //interface to standardize all API responses, T is generic and can hold any type of data
 export interface ApiResponse<T = any> {
     success: boolean;
@@ -77,7 +87,7 @@ export interface ApiResponse<T = any> {
     message?: string;
     pagination?: PaginationInfo;
 }
-
+ 
 //interface to standardize pagination data across paginated endpoints
 export interface PaginationInfo {
     currentPage: number;
@@ -87,11 +97,11 @@ export interface PaginationInfo {
     hasNextPage: boolean;
     hasPrevPage: boolean;
 }
-
-
+ 
+ 
 export interface HotelRequiredFields extends Omit<HotelAttributes, 'GlobalPropertyID' | 'PropertyAddress2' | 'PropertyFaxNumber' | 'ManagerUsername'>{}
-
-
+ 
+ 
 //extend express Request interface to include user information so that we can use 'req.user.id'
 declare global {
     namespace Express {
@@ -100,12 +110,12 @@ declare global {
         }
     }
 }
-
+ 
 export interface RoleAttributes {
     RoleID: number;
     RoleName: string;
 }
-
+ 
 export interface UserAttributes {
     UserID: number;
     Username: string;
@@ -113,12 +123,12 @@ export interface UserAttributes {
     Email: string;
     RoleID: number;
 }
-
+ 
 export interface UserCreationAttributes extends Omit<UserAttributes, 'UserID'> {};
-
+ 
 export interface PermissionAttributes {
     PermissionID: number;
     RoleID: number;
     Resource: string;
     Action: string;
-}
+} 

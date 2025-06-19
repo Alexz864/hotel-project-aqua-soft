@@ -5,6 +5,7 @@ import hotelRoutes from './routes/hotelRoutes';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import managerRoutes from './routes/managerRoutes';
+import reviewRoutes from './routes/reviewRoutes';
 
 //load environment variables
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(express.json());
 //routes
 app.use('/api', hotelRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/', reviewRoutes);
 app.use('/api', userRoutes);
 app.use('/api', managerRoutes);
 

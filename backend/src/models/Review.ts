@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/database';
 import { ReviewAttributes } from '../types';
 import Hotel from './Hotel';
-
+ 
 class Review extends Model<ReviewAttributes> implements ReviewAttributes {
     public ReviewID!: number;
     public HotelID!: number;
@@ -15,10 +15,16 @@ class Review extends Model<ReviewAttributes> implements ReviewAttributes {
     public LocationRating!: number;
     public ServiceRating!: number;
     public ValueRating!: number;
+    public FoodBeverage!: number;
+    public SleepQuality!: number;
+    public InternetQuality!: number;
+    public AmenitiesRating!: number;
+    public helpfulYes!: number;
+    public helpfulNo!: number;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 }
-
+ 
 Review.init(
     {
         ReviewID: {
@@ -55,7 +61,7 @@ Review.init(
             allowNull: false,
             validate: {
                 min: 1.0,
-                max: 5.0
+                max: 10.0
             }
         },
         CleanlinessRating: {
@@ -63,7 +69,7 @@ Review.init(
             allowNull: false,
             validate: {
                 min: 1.0,
-                max: 5.0
+                max: 10.0
             }
         },
         LocationRating: {
@@ -71,7 +77,7 @@ Review.init(
             allowNull: false,
             validate: {
                 min: 1.0,
-                max: 5.0
+                max: 10.0
             }
         },
         ServiceRating: {
@@ -79,7 +85,7 @@ Review.init(
             allowNull: false,
             validate: {
                 min: 1.0,
-                max: 5.0
+                max: 10.0
             }
         },
         ValueRating: {
@@ -87,9 +93,53 @@ Review.init(
             allowNull: false,
             validate: {
                 min: 1.0,
-                max: 5.0
+                max: 10.0
             }
+        },
+        FoodBeverage: {
+        type: DataTypes.DECIMAL(3, 1),
+        allowNull: true,
+        validate: {
+            min: 1.0,
+            max: 10.0
         }
+        },
+        SleepQuality: {
+        type: DataTypes.DECIMAL(3, 1),
+        allowNull: true,
+        validate: {
+            min: 1.0,
+            max: 10.0
+        }
+        },
+        InternetQuality: {
+        type: DataTypes.DECIMAL(3, 1),
+        allowNull: true,
+        validate: {
+            min: 1.0,
+            max: 10.0
+        }
+        },
+        AmenitiesRating: {
+        type: DataTypes.DECIMAL(3, 1),
+        allowNull: true,
+        validate: {
+            min: 1.0,
+            max: 10.0
+        }
+        },
+        helpfulYes: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0,
+        },
+        helpfulNo: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0,
+        },
+ 
+ 
     },
     {
         sequelize,
@@ -109,9 +159,9 @@ Review.init(
         ]
     }
 );
-
+ 
 //many-to-one relationship
 Review.belongsTo(Hotel, { foreignKey: 'HotelID', targetKey: 'GlobalPropertyID', as: 'hotel' });
 Hotel.hasMany(Review, { foreignKey: 'HotelID', sourceKey: 'GlobalPropertyID', as: 'reviews' });
-
+ 
 export default Review;

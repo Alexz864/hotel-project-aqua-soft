@@ -4,7 +4,7 @@ import { HotelAttributes, HotelCreationAttributes } from "../types";
 import City from "./City";
 import Region from "./Region";
 import User from "./User";
-
+ 
 class Hotel extends Model<HotelAttributes, HotelCreationAttributes> implements HotelAttributes {
     public GlobalPropertyID!: number;
     public SourcePropertyID!: string;
@@ -23,8 +23,13 @@ class Hotel extends Model<HotelAttributes, HotelCreationAttributes> implements H
     public PropertyLongitude!: number;
     public SourceGroupCode!: string;
     public ManagerUsername!: string;
+    //for hotels dashboard
+    public DistanceToTheAirport?: number;
+    public RoomsNumber?: number;
+    public FloorsNumber?: number;
+    public HotelStars?: number;
 }
-
+ 
 Hotel.init(
     {
         GlobalPropertyID: {
@@ -32,38 +37,38 @@ Hotel.init(
             primaryKey: true,
             autoIncrement: true
         },
-
+ 
         SourcePropertyID: {
             type: DataTypes.STRING(50),
             unique: true,
             allowNull: false
         },
-
+ 
         GlobalPropertyName: {
             type: DataTypes.STRING(100),
             allowNull: false
         },
-
+ 
         GlobalChainCode: {
             type: DataTypes.STRING(20),
             allowNull: false
         },
-
+ 
         PropertyAddress1: {
             type: DataTypes.TEXT,
             allowNull: false
         },
-
+ 
         PropertyAddress2: {
             type: DataTypes.TEXT,
             allowNull: true
         },
-
+ 
         PrimaryAirportCode: {
             type: DataTypes.STRING(20),
             allowNull: false
         },
-
+ 
         CityID: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -72,7 +77,7 @@ Hotel.init(
                 key: 'CityID'
             }
         },
-
+ 
         PropertyStateProvinceID: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -81,42 +86,42 @@ Hotel.init(
                 key: 'PropertyStateProvinceID'
             }
         },
-
+ 
         PropertyZipPostal: {
             type: DataTypes.STRING(30),
             allowNull: false
         },
-
+ 
         PropertyPhoneNumber: {
             type: DataTypes.STRING(30),
             allowNull: false
         },
-
+ 
         PropertyFaxNumber: {
             type: DataTypes.STRING(30),
             allowNull: true
         },
-
+ 
         SabrePropertyRating: {
             type: DataTypes.DECIMAL(3, 1),
             allowNull: false
         },
-
+ 
         PropertyLatitude: {
             type: DataTypes.DECIMAL(9, 6),
             allowNull: false
         },
-
+ 
         PropertyLongitude: {
             type: DataTypes.DECIMAL(9, 6),
             allowNull: false
         },
-
+ 
         SourceGroupCode: {
             type: DataTypes.STRING(20),
             allowNull: false
         },
-
+ 
         ManagerUsername: {
             type: DataTypes.STRING(50),
             allowNull: true,
@@ -124,7 +129,39 @@ Hotel.init(
                 model: User,
                 key: 'Username'
             }
+        },
+ 
+        DistanceToTheAirport: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+        },
+ 
+        RoomsNumber: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            validate: {
+                min: 1
+            }
+        },
+ 
+        FloorsNumber: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            validate: {
+                min: 1
+            }
+        },
+ 
+        HotelStars: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 3,
+            validate: {
+                min: 1,
+                max: 5
+            }
         }
+ 
     },
     {
         sequelize,
@@ -133,17 +170,17 @@ Hotel.init(
         timestamps: false
     }
 );
-
+ 
 //many-to-one relationship
 Hotel.belongsTo(City, { foreignKey: 'CityID', as: 'city' });
 City.hasMany(Hotel, { foreignKey: 'CityID', as: 'hotels' });
-
+ 
 //many-to-one relationship
 Hotel.belongsTo(Region, { foreignKey: 'PropertyStateProvinceID', as: 'region' });
 Region.hasMany(Hotel, { foreignKey: 'PropertyStateProvinceID', as: 'hotels' });
-
+ 
 //many-to-one relationship with managers
 Hotel.belongsTo(User, { foreignKey: 'ManagerUsername', targetKey: 'Username', as: 'manager' });
 User.hasMany(Hotel, { foreignKey: 'ManagerUsername', sourceKey: 'Username', as: 'managedHotels' });
-
+ 
 export default Hotel;
