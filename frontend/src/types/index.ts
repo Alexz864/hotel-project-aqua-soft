@@ -1,4 +1,3 @@
-
 //API Response types
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -95,7 +94,7 @@ export interface Hotel {
 }
 
 export interface HotelCreationRequest {
-  SourcePropertyID: string;
+  SourcePropertyID?: string;
   GlobalPropertyName: string;
   GlobalChainCode: string;
   PropertyAddress1: string;

@@ -160,8 +160,8 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
         const hotelData = req.body as HotelAttributes;
 
         //define requiredFields array using TypeScript keyof to ensure field names match interface
+        //removed SourcePropertyID from required fields since it will be auto-generated
         const requiredFields: (keyof HotelRequiredFields)[] = [
-            'SourcePropertyID',
             'GlobalPropertyName',
             'GlobalChainCode',
             'PropertyAddress1',
@@ -218,15 +218,15 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
             const errorResponse: ApiResponse = {
                 success: false,
                 error: 'Invalid manager.',
-                message: `Manager '${hotelData.ManagerUsername}' not found or doesn't have manger role.`
+                message: `Manager '${hotelData.ManagerUsername}' not found or doesn't have manager role.`
             };
             res.status(400).json(errorResponse);
             return;
         }
 
         //destructure hotelData object to extract individual fields
+        //removed SourcePropertyID from destructuring since it will be auto-generated
         const {
-            SourcePropertyID,
             GlobalPropertyName,
             GlobalChainCode,
             PropertyAddress1,
@@ -269,9 +269,16 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
             return;
         }
 
+        //generate a unique SourcePropertyID
+        //you can customize this logic based on your requirements
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const generatedSourcePropertyID = `HTL-${timestamp}-${randomSuffix}`;
+
         //create new hotel record within transaction
+        //using the auto-generated SourcePropertyID
         const newHotel = await Hotel.create({
-            SourcePropertyID: SourcePropertyID!,
+            SourcePropertyID: generatedSourcePropertyID,
             GlobalPropertyName: GlobalPropertyName!,
             GlobalChainCode: GlobalChainCode!,
             PropertyAddress1: PropertyAddress1!,
@@ -288,7 +295,6 @@ export const createHotel = async (req: Request, res: Response<ApiResponse>): Pro
             SourceGroupCode: SourceGroupCode!,
             ManagerUsername: hotelData.ManagerUsername.trim()
         } as HotelCreationAttributes, { transaction });
-
 
         //fetch the created hotel with relationships
         const createdHotel = await Hotel.findByPk(newHotel.GlobalPropertyID, {

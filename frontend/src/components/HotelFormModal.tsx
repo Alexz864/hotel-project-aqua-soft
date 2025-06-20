@@ -22,7 +22,6 @@ const HotelFormModal: React.FC<HotelFormModalProps> = ({
   const [statesProvinces, setStatesProvinces] = useState<StateProvince[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
   const [formData, setFormData] = useState<HotelCreationRequest>({
-    SourcePropertyID: '',
     GlobalPropertyName: '',
     GlobalChainCode: '',
     PropertyAddress1: '',
@@ -93,7 +92,6 @@ const HotelFormModal: React.FC<HotelFormModalProps> = ({
     } else {
       //reset form for new hotel
       setFormData({
-        SourcePropertyID: '',
         GlobalPropertyName: '',
         GlobalChainCode: '',
         PropertyAddress1: '',
@@ -117,9 +115,6 @@ const HotelFormModal: React.FC<HotelFormModalProps> = ({
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!hotel && !formData.SourcePropertyID.trim()) {
-      newErrors.SourcePropertyID = 'Source Property ID is required';
-    }
     if (!formData.GlobalPropertyName.trim()) {
       newErrors.GlobalPropertyName = 'Property name is required';
     }
@@ -211,37 +206,36 @@ const HotelFormModal: React.FC<HotelFormModalProps> = ({
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {!hotel && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Source Property ID</label>
-                <input
-                  type="text"
-                  value={formData.SourcePropertyID}
-                  onChange={(e) => updateField('SourcePropertyID', e.target.value)}
-                  className={`w-full px-3 py-2 bg-gray-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.SourcePropertyID ? 'border-red-500' : 'border-gray-600'
-                  }`}
-                  placeholder="Enter source property ID"
-                />
-                {errors.SourcePropertyID && <p className="mt-1 text-sm text-red-400">{errors.SourcePropertyID}</p>}
-              </div>
-            )}
-
-            <div className={!hotel ? '' : 'md:col-span-2'}>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Property Name</label>
+          {/* Show SourcePropertyID only when editing */}
+          {hotel && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Source Property ID</label>
               <input
                 type="text"
-                value={formData.GlobalPropertyName}
-                onChange={(e) => updateField('GlobalPropertyName', e.target.value)}
-                className={`w-full px-3 py-2 bg-gray-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.GlobalPropertyName ? 'border-red-500' : 'border-gray-600'
-                }`}
-                placeholder="Enter property name"
+                value={formData.SourcePropertyID || ''}
+                disabled
+                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-gray-300 cursor-not-allowed"
+                placeholder="Auto-generated"
               />
-              {errors.GlobalPropertyName && <p className="mt-1 text-sm text-red-400">{errors.GlobalPropertyName}</p>}
+              <p className="mt-1 text-xs text-gray-400">This field cannot be modified</p>
             </div>
+          )}
 
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Property Name</label>
+            <input
+              type="text"
+              value={formData.GlobalPropertyName}
+              onChange={(e) => updateField('GlobalPropertyName', e.target.value)}
+              className={`w-full px-3 py-2 bg-gray-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.GlobalPropertyName ? 'border-red-500' : 'border-gray-600'
+              }`}
+              placeholder="Enter property name"
+            />
+            {errors.GlobalPropertyName && <p className="mt-1 text-sm text-red-400">{errors.GlobalPropertyName}</p>}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Chain Code</label>
               <input
